@@ -103,22 +103,34 @@ from scipy.signal import convolve2d as scipy_conv2d
 img = io.imread("resources/MonaLisa.jpg")
 img_float = img_as_float(img)
 
-def kernel(w, scale = 3, center_val=1):
-    kernel = np.full(shape=(scale, scale), fill_value=w)
-    center = scale // 2
-    if scale % 2 == 0:
-        r = (center-1,center+1) 
-        kernel[r[0]:r[1], r[0]:r[1]] = center_val
-    else:
-        kernel[center,center] = center_val
-    return kernel
+# the center should be n x n
+def kernel(w, scale=3, center_val=1):
+    
+    center = np.ones((scale,scale)) *center_val
+    complete = np.pad(center, scale ,"constant",constant_values=w)
+    # print(ddcomplete)
+    return complete
+
+    # kernel = np.full(shape=(scale, scale), fill_value=w)
+    # center = scale // 2
+    # if scale % 2 == 0:
+    #     r = (center-1,center+1) 
+    #     kernel[r[0]:r[1], r[0]:r[1]] = center_val
+    # else:
+    #     kernel[center,center] = center_val
+    # return kernel
 
 def convolve2d(f_in,w,**kwargs):
     w = np.rot90(w,2)
     return scipy_conv2d(f_in,w,**kwargs)
 
 
+ker = kernel(-0.1, scale=3, center_val=1)
+print(ker.shape)
+print(ker)
+
 img_kern = convolve2d(img_float, kernel(-0.1, 6, center_val=1))
+print(img_kern)
 fig = plt.figure(figsize= (10,10))
 plt.imshow(img_kern, 'gray')
 
@@ -126,9 +138,17 @@ plt.imshow(img_kern, 'gray')
 
 # Try different levels
 fig, axes = plt.subplots(3, 3)
+fig.set_figwidth(15)
+fig.set_figheight(15)
 
-for i in range(4,12):
-    img_kern = convolve2d(img_float, kernel(-0.1, i, center_val=i/10))
-    axes[i//3,i%3].imshow(img_kern, 'gray')
+for a,i in enumerate(range(4,12)):
+    img_kern = convolve2d(img_float, kernel(-0.1, a, center_val=1))
+    axes[a//3,a%3].imshow(img_kern, 'gray')
+    axes[a // 3, a % 3].set_title(f"Scale = {i}")
 
 plt.show()  
+
+# Threshholds
+plt.imshow(compute_activations(img_kern, threshold=0.4), 'gray')
+
+# 5
