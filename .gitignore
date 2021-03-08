@@ -128,4 +128,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 HomeWork1.pdf
-./top-secret/
+./top\-secret/
