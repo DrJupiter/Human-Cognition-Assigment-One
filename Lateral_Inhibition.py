@@ -33,7 +33,7 @@ activation_levels = compute_activation_levels(lis)
 
 # When the threshold is set to 1-w then we get edge detection
 # So in our case 1-0.1 = 0.9
-activations = compute_activations(activation_levels, 0.1)
+activations = compute_activations(activation_levels, 0.9)
 max_index = np.argmax(activation_levels)
 print(f"Activation levels for Q1: {activation_levels}\nNeurons Activated: {activations}\n1 means active, 0 means inactive.")
 print(f"The index of the cell(s) with the highest activation level is {max_index} with a value of {activation_levels[max_index]}\n")
@@ -61,10 +61,11 @@ I2 = [0 ,0 ,0 ,1 ,1 ,1 ,2 ,2 ,2 ,3 ,3 ,3 ,4 ,4 ,4 ,5 ,5 ,5]
 
 activation_levels2 = compute_activation_levels(I2)
 print(f"Activation levels for Q2: {activation_levels2}")
+print(len(activation_levels2))
 
 
-inputs = np.array(I2[1:-1])
-print(inputs)
+inputs = np.array(I2[1:len(I2)-1])
+print(inputs, len(inputs))
 inputs_norm = (inputs-min(inputs))/(max(inputs)-min(inputs))
 activation_levels2 = (activation_levels2-min(activation_levels2))/(max(activation_levels2)-min(activation_levels2))
 
@@ -73,10 +74,20 @@ activation_levels2 = (activation_levels2-min(activation_levels2))/(max(activatio
 # print(activation_levels2)
 
 fig, (a1,a2,a3) = plt.subplots(3,1)
-a1.imshow([inputs_norm[1:-1]], cmap='gray')
+#a1.imshow([inputs_norm[1:-1]], cmap='gray')
+a1.imshow([inputs_norm], cmap='gray')
 a1.set_title("Q2 Input")
+a1.set_xticks([i for i in range(1,17)])
+
+#display_dict = {}
+#
+#for key, val in enumerate(activation_levels2):
+#    display_dict[key+1] = val
+#a2.imshow(sorted(display_dict.items()), cmap='gray')
+
 a2.imshow([activation_levels2], cmap='gray')
 a2.set_title("Q2 Activation levels")
+a2.set_xticks([i for i in range(1,17)])
 
 # 3
 
@@ -93,14 +104,13 @@ res = np.convolve(I2, kernel, "valid")
 print(f"Activation levels for Q3: {res}")
 a3.imshow([res], cmap='gray')
 a3.set_title("Q3 Activation levels")
-#plt.show()
-
+a3.set_xticks([i for i in range(0,17)])
 
 # 4 
 
 from scipy.signal import convolve2d as scipy_conv2d
 
-img = io.imread("resources/MonaLisa.jpg")
+img = io.imread("resources/hermann.jpg")
 img_float = img_as_float(img)
 
 # the center should be n x n
@@ -124,24 +134,44 @@ def convolve2d(f_in,w,**kwargs):
     w = np.rot90(w,2)
     return scipy_conv2d(f_in,w,**kwargs)
 
+fig = plt.figure(figsize= (10,10))
+plt.title('Grayscaled Mona Lisa')
+plt.imshow(img_float, 'gray')
 
 ker = kernel(-0.1, scale=3, center_val=1)
 print(ker.shape)
 print(ker)
 
-img_kern = convolve2d(img_float, kernel(-0.1, 6, center_val=1))
+n = 1
+img_kern = convolve2d(img_float, kernel(-0.1, n, center_val=1))
 print(img_kern)
 fig = plt.figure(figsize= (10,10))
 plt.imshow(img_kern, 'gray')
+plt.title(f'Convolution with n = {n}')
 
 
 
 # Try different levels
-fig, axes = plt.subplots(3, 3)
+r, c = 5, 3
+fig, axes = plt.subplots(r, c)
 fig.set_figwidth(15)
 fig.set_figheight(15)
+fig.tight_layout()
 
-for a,i in enumerate(range(4,12)):
+p=1
+
+for i in range(r):
+    for j in range(c): 
+        img_conv = convolve2d(img_float, kernel(-0.1, p, center_val=1))
+        axes[i, j].imshow(img_conv, 'gray')
+        axes[i, j].set_title(f"n = {p}")
+        p += 1
+
+plt.show()  
+
+exit(0)
+
+for a,i in enumerate(range(0,25)):
     img_kern = convolve2d(img_float, kernel(-0.1, a, center_val=1))
     axes[a//3,a%3].imshow(img_kern, 'gray')
     axes[a // 3, a % 3].set_title(f"Scale = {i}")
